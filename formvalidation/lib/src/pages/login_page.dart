@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:formvalidation/src/blocs/login_bloc.dart';
+import 'package:formvalidation/src/blocs/provider.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({Key key}) : super(key: key);
@@ -61,6 +63,7 @@ class LoginPage extends StatelessWidget {
   }
 
   Widget _loginform(BuildContext context) {
+    final bloc = Provider.of(context);
     final size = MediaQuery.of(context).size;
     return SingleChildScrollView(      
       child: Column(
@@ -90,9 +93,9 @@ class LoginPage extends StatelessWidget {
               children: [
                 Text("ingreso", style: TextStyle(fontSize: 20.0),),
                 SizedBox(height: 60.0,),
-                _crearEmail(),
+                _crearEmail(bloc),
                 SizedBox(height: 30.0,),
-                _crearPassword(),
+                _crearPassword(bloc),
                 SizedBox(height: 30.0,),
                 _crearBoton()
               ],
@@ -104,30 +107,50 @@ class LoginPage extends StatelessWidget {
       ),
     );
   }
-  Widget _crearEmail(){
-    return Container(
+  Widget _crearEmail(LoginBloc bloc){
+    return StreamBuilder(
+      stream: bloc.emailStream ,      
+      builder: (BuildContext context, AsyncSnapshot snapshot){
+        return Container(
       padding: EdgeInsets.symmetric(horizontal: 20.0),
       child: TextField(
         keyboardType: TextInputType.emailAddress,
         decoration: InputDecoration(
           icon: Icon(Icons.alternate_email, color: Colors.deepPurple,),
           hintText: "ejemplo@correo.com",
-          labelText: "correo electronico"
+          labelText: "correo electronico",
+          counterText: snapshot.data,
+          errorText: snapshot.error
         ),
+        onChanged: (value)=>bloc.changeEmail(value),
+        //onChanged:bloc.changeEmail,   es lo mismo
       ),
     );
+      },
+    );
+    
   }
-  Widget _crearPassword(){
-    return Container(
+  Widget _crearPassword(LoginBloc bloc){
+
+    return StreamBuilder(
+      stream: bloc.passwordStream ,      
+      builder: (BuildContext context, AsyncSnapshot snapshot){
+       return Container(
       padding: EdgeInsets.symmetric(horizontal: 20.0),
       child: TextField(
         obscureText: true,
         decoration: InputDecoration(
           icon: Icon(Icons.lock, color: Colors.deepPurple,),          
-          labelText: "contraseña"
+          labelText: "contraseña",
+          counterText: snapshot.data,
+          errorText: snapshot.error
         ),
+        onChanged: bloc.changePassword,
       ),
     );
+      },
+    );
+    
   }
   Widget _crearBoton(){
     return RaisedButton(
